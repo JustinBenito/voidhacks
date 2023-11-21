@@ -6,7 +6,7 @@ const TeachableMachineComponent = () => {
   const webcamRef = useRef(null);
   const [currentPrediction, setCurrentPrediction] = useState('');
 
-  const URL = "https://teachablemachine.withgoogle.com/models/JnXM4ZO7H/";
+  const URL = "https://teachablemachine.withgoogle.com/models/HyxCV8P4C/";
   let model, maxPredictions;
 
   useEffect(() => {

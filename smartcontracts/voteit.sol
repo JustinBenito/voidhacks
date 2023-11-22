@@ -10,7 +10,7 @@ contract Voteit {
 
     mapping(address => Voter) public voters;
     uint public totalVotes;
-    uint public yesVotes;
+    uint public nota;
 
     address public admin;
 
@@ -43,7 +43,7 @@ contract Voteit {
         totalVotes++;
 
         if (_choice) {
-            yesVotes++;
+            nota++;
         }
 
         return true;

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Web3 from 'web3';
+import { createCredential, verifyAssertion } from 'webauthn-json';
 
 const TeachableMachineComponent = () => {
 
@@ -439,6 +440,7 @@ const TeachableMachineComponent = () => {
   const [account, setAccount] = useState('');
   const [balance, setBalance] = useState(0);
   const [votingIndex, setVotingIndex] = useState(0);
+  const [seevote, setSee]=useState(false)
   const [aadharname, setName]=useState('')
 
   const webcamContainerRef = useRef(null);
@@ -462,8 +464,10 @@ const TeachableMachineComponent = () => {
       if (aadharNumber && account) {
         const storedData = JSON.parse(localStorage.getItem('aadhar')) || {};
         storedData[aadharNumber] = {"account": account, "name":aadharname};
+        
         localStorage.setItem('aadhar', JSON.stringify(storedData));
         console.log(storedData);
+        showVotingUI()
         alert('Successfully got you in');
       }
     } else {
@@ -539,7 +543,7 @@ const TeachableMachineComponent = () => {
 
   const showVotingUI = () => {
     // Set the state to show the voting UI
-    setVotingIndex(null); // Reset the selected voting option
+    setSee(true); // Reset the selected voting option
   };
 
 
@@ -591,31 +595,30 @@ const TeachableMachineComponent = () => {
   }, []); // empty dependency array to run the effect only once when the component mounts
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl font-bold mb-8">New Indian Voting System</h1>
-
-      <div className="relative bg-gray-300 w-full sm:w-96 h-96 sm:h-72 mb-4">
+    <div className="flex flex-col items-center justify-center text-white bg-gradient-to-b from-black via-gray-500 to-gray-900 h-screen">
+      <h1 className="text-5xl font-bold mb-8 text-white mt-8">🗳 New Indian Voting System</h1>
+  
+      <div className="relative bg-gray-300 w-full sm:w-96 h-96 sm:h-72 mb-4 rounded-md overflow-hidden">
         {/* Your webcam container component */}
         <div ref={webcamContainerRef} className="absolute inset-0"></div>
       </div>
-
-      <div className="bg-gray-300 w-full sm:w-96 h-48 mb-8">
+  
+      <div className="bg-gray-300 w-full sm:w-96 h-48 mb-8 rounded-md">
         {/* Display the class with the highest probability */}
-        <div className="h-full">{currentPrediction}</div>
+        <div className="h-full flex items-center justify-center text-2xl font-semibold">{currentPrediction}</div>
       </div>
-
-
+  
       {account && (
         <>
           <div className="mt-4">
-            <label className="block text-lg mb-2">Aadhar Number:</label>
+            <label className="block font-bold text-center text-lg mb-2">Aadhar Number</label>
             <input
               type="text"
               value={aadharNumber}
               onChange={handleAadharChange}
               className="w-full p-2 border rounded-md text-black"
             />
-            <label className="block text-lg mb-2">Your Name:</label>
+            <label className="block text-lg text-center mt-2 font-bold mb-2">Your Name</label>
             <input
               type="text"
               value={aadharname}
@@ -623,8 +626,8 @@ const TeachableMachineComponent = () => {
               className="w-full p-2 border rounded-md text-black"
             />
             <button
-              onClick={handleSaveAadhar}
-              className="mt-2 bg-blue-500 text-white text-center p-2 rounded-md hover:bg-blue-600 cursor-pointer"
+              onClick={()=>{handleSaveAadhar();}}
+              className="mt-4 flex mx-auto mb-4  bg-green-400 text-white text-center p-2 rounded-md hover:bg-blue-600 cursor-pointer"
             >
               Lets Get in
             </button>
@@ -636,34 +639,30 @@ const TeachableMachineComponent = () => {
         onClick={handleStart}
         className="bg-blue-500 text-white px-4 py-2 rounded"
       >
-        Start
+        I will Vote
       </button>
+  
       {/* Show the voting UI when the state is set */}
-      {votingIndex !== null && (
+      {seevote && (
         <div className="mt-4">
-          <h2 className="text-lg font-bold mb-2 gap-8 mr-2">Select your vote:</h2>
-          <div className='gap-4 mr-4 p-2'>
+          <h2 className="text-lg font-bold mb-2 gap-8 mr-2 text-center">Vote for your Party</h2>
+          <div className='gap-4 p-2 flex justify-center align-middle items-center mx-auto'>
             <button
-              onClick={() => {setVotingIndex(0); console.log("0")}}
-              className={`bg-blue-500 mr-4 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer ${
-                votingIndex === 0 ? 'border border-black' : ''
-              }`}
+              onClick={() => { setVotingIndex(0); console.log("0"); }}
+              className={`bg-orange-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer ${votingIndex === 0 ? 'border border-black' : ''}`}
             >
               Justin Party
             </button>
             <button
-              onClick={() => {setVotingIndex(1); console.log("1")}}
-              className={`bg-blue-500 mr-4 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer ${
-                votingIndex === 1 ? 'border border-black' : ''
-              }`}
+              onClick={() => { setVotingIndex(1); console.log("1"); }}
+              className={`bg-yellow-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer ${votingIndex === 1 ? 'border border-black' : ''}`}
             >
               Developers Party
             </button>
-
           </div>
           <button
             onClick={vote}
-            className="mt-2 flex flex-auto mx-auto bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer"
+            className="mt-2 mb-4 flex flex-auto mx-auto bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer focus:outline-none focus:ring focus:border-blue-300"
           >
             Vote
           </button>
@@ -671,6 +670,7 @@ const TeachableMachineComponent = () => {
       )}
     </div>
   );
+  
 };
 
 export default TeachableMachineComponent;
